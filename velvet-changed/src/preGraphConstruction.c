@@ -878,11 +878,6 @@ createPreNodesOMP(RoadMapArray * rdmaps, PreGraph * preGraph,
 		if (sequenceIndex % 1000000 == 2)
 		velvetLog("Sequence %li / %li\n", (long) sequenceIndex,
 				(long) sequenceCount_pg(preGraph));
-		// if (!seqReadInfo->m_bIsBinary) {
-		// 	while (line[0] != '>')
-		// 		if (!fgets(line, lineLength, file))
-		// 			exitErrorf(EXIT_FAILURE, true, "%s incomplete.", sequenceFilename);
-		// }
 
 		rdmap = getRoadMapInArray(rdmaps, sequenceIndex - 1);
 		annot = startAnnot[sequenceIndex - 1];
@@ -921,16 +916,6 @@ createPreNodesOMP(RoadMapArray * rdmaps, PreGraph * preGraph,
 					break;
 				}
 				c = sequences[sequenceIndex - 1][readIndex];
-				// c = getc(file);
-				// while (c == '\n' || c == '\r') 
-				// 	c = getc(file);
-		
-				// if (c == '>' || c == 'M' || c == EOF) {
-				// 	ungetc(c, file);
-				// 	tooShort = true;
-				// 	break;
-				// }
-				// }
 				switch (c) {
 				case 'A':
 				case 'N':
@@ -993,9 +978,7 @@ createPreNodesOMP(RoadMapArray * rdmaps, PreGraph * preGraph,
 					}
 				}
 				
-				// threadLocalPreNodeCounter = __sync_fetch_and_add(&preNodeCounter, 1);
 				// velvetLog("In annot loop, about to addPreNode, ID %d, readIndex %d, markerIndex %li, lastMarkerIndex %li, currentPosition %d, nextStop %d\n", threadLocalPreNodeCounter, readIndex, (long) markerIndex, (long) lastMarkerIndex, currentPosition, nextStop);
-				//	velvetLog("Adding pre nodes from %lli to %lli\n", (long long) currentPosition, (long long) nextStop);
 				addPreNodeToPreGraph_pgOMP(preGraph,
 							currentPosition,
 							nextStop,
@@ -1007,7 +990,6 @@ createPreNodesOMP(RoadMapArray * rdmaps, PreGraph * preGraph,
 				// 	chains[sequenceIndex] = threadLocalPreNodeCounter;
 				// }
 				latestPreNodeID = threadLocalPreNodeCounter;
-				// latestPreNodeID = preNodeCounter++;
 				currentPosition = nextStop;
 			}
 
@@ -1038,12 +1020,7 @@ createPreNodesOMP(RoadMapArray * rdmaps, PreGraph * preGraph,
 							break;
 						}
 						c = sequences[sequenceIndex - 1][readIndex];
-						// c = getc(file);
-						// while (!isalpha(c))
-						// 	c = getc(file);
-						// }
 
-						//	velvetLog("(%c)", c);
 						switch (c) {
 						case 'A':
 						case 'N':
@@ -1100,20 +1077,10 @@ createPreNodesOMP(RoadMapArray * rdmaps, PreGraph * preGraph,
 				threadLocalPreNodeCounter++;
 				// if (latestPreNodeID == 0)
 				// 	chains[sequenceIndex] = threadLocalPreNodeCounter;
-				// latestPreNodeID = preNodeCounter++;
 				latestPreNodeID = threadLocalPreNodeCounter;
 				currentPosition = getInsertionMarkerPosition(currentMarker);
 			}
 		}
-		// if (seqReadInfo->m_bIsBinary) {
-		// 	free(strString);
-		// } 
-		// else {
-		// 	// End of sequence
-		// 	if (!fgets(line, lineLength, file) && sequenceIndex < sequenceCount_pg(preGraph))
-		// 		exitErrorf(EXIT_FAILURE, true, "%s incomplete.", sequenceFilename);
-		// 	//velvetLog(" \n");
-		// }
 
 		// if (latestPreNodeID == 0)
 		// 	chains[sequenceIndex] = threadLocalPreNodeCounter;
