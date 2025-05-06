@@ -31,7 +31,13 @@ endif
 # OpenMP 
 ifdef OPENMP
 override CFLAGS := $(CFLAGS) -fopenmp
+VELVETG_BIN := velvetg-omp
+VELVETH_BIN := velveth-omp
+else
+VELVETG_BIN := velvetg
+VELVETH_BIN := velveth
 endif
+
 
 # Per library coverage
 ifdef SINGLE_COV_CAT
@@ -41,7 +47,7 @@ endif
 OBJ = obj/tightString.o obj/run.o obj/splay.o obj/splayTable.o obj/graph.o obj/run2.o obj/fibHeap.o obj/fib.o obj/concatenatedGraph.o obj/passageMarker.o obj/graphStats.o obj/correctedGraph.o obj/dfib.o obj/dfibHeap.o obj/recycleBin.o obj/readSet.o obj/binarySequences.o obj/shortReadPairs.o obj/locallyCorrectedGraph.o obj/graphReConstruction.o obj/roadMap.o obj/preGraph.o obj/preGraphConstruction.o obj/concatenatedPreGraph.o obj/readCoherentGraph.o obj/utility.o obj/kmer.o obj/scaffold.o obj/kmerOccurenceTable.o obj/allocArray.o obj/autoOpen.o
 OBJDBG = $(subst obj,obj/dbg,$(OBJ))
 
-default : cleanobj zlib obj velveth velvetg doc
+default : cleanobj zlib obj $(VELVETH_BIN) $(VELVETG_BIN) doc
 
 clean : clean-zlib
 	-rm obj/*.o obj/dbg/*.o ./velvet* 
@@ -68,12 +74,12 @@ zlib :
 clean-zlib :
 endif
 
-velveth : obj 
-	$(CC) $(CFLAGS) $(OPT) $(LDFLAGS) -o velveth obj/tightString.o obj/run.o obj/recycleBin.o obj/splay.o obj/splayTable.o obj/readSet.o obj/binarySequences.o obj/utility.o obj/kmer.o obj/kmerOccurenceTable.o obj/autoOpen.o $(Z_LIB_FILES) $(LIBS)
+$(VELVETH_BIN) : obj 
+	$(CC) $(CFLAGS) $(OPT) $(LDFLAGS) -o $@ obj/tightString.o obj/run.o obj/recycleBin.o obj/splay.o obj/splayTable.o obj/readSet.o obj/binarySequences.o obj/utility.o obj/kmer.o obj/kmerOccurenceTable.o obj/autoOpen.o $(Z_LIB_FILES) $(LIBS)
 
 
-velvetg : obj
-	$(CC) $(CFLAGS) $(OPT) $(LDFLAGS) -o velvetg obj/tightString.o obj/graph.o obj/run2.o obj/fibHeap.o obj/fib.o obj/concatenatedGraph.o obj/passageMarker.o obj/graphStats.o obj/correctedGraph.o obj/dfib.o obj/dfibHeap.o obj/recycleBin.o obj/readSet.o obj/binarySequences.o obj/shortReadPairs.o obj/scaffold.o obj/locallyCorrectedGraph.o obj/graphReConstruction.o obj/roadMap.o obj/preGraph.o obj/preGraphConstruction.o obj/concatenatedPreGraph.o obj/readCoherentGraph.o obj/utility.o obj/kmer.o obj/kmerOccurenceTable.o obj/allocArray.o obj/autoOpen.o $(Z_LIB_FILES) $(LIBS)
+$(VELVETG_BIN) : obj
+	$(CC) $(CFLAGS) $(OPT) $(LDFLAGS) -o $@ obj/tightString.o obj/graph.o obj/run2.o obj/fibHeap.o obj/fib.o obj/concatenatedGraph.o obj/passageMarker.o obj/graphStats.o obj/correctedGraph.o obj/dfib.o obj/dfibHeap.o obj/recycleBin.o obj/readSet.o obj/binarySequences.o obj/shortReadPairs.o obj/scaffold.o obj/locallyCorrectedGraph.o obj/graphReConstruction.o obj/roadMap.o obj/preGraph.o obj/preGraphConstruction.o obj/concatenatedPreGraph.o obj/readCoherentGraph.o obj/utility.o obj/kmer.o obj/kmerOccurenceTable.o obj/allocArray.o obj/autoOpen.o $(Z_LIB_FILES) $(LIBS)
 
 debug : override DEF := $(DEF) -D DEBUG 
 debug : cleanobj obj/dbg

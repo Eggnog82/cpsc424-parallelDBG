@@ -34,18 +34,18 @@ Copyright 2007, 2008 Daniel Zerbino (zerbino@ebi.ac.uk)
 #define NULL 0
 #endif
 
-union positionPtr {
-	ShortLength coord;
-	IDnum nodeID;
-}  ATTRIBUTE_PACKED;
+// union positionPtr {
+// 	ShortLength coord;
+// 	IDnum nodeID;
+// }  ATTRIBUTE_PACKED;
 
-struct annotation_st {
-	ShortLength position;	// 32
-	union positionPtr start;	// 32
-	union positionPtr finish;	// 32
-	ShortLength length;	// 32
-	IDnum sequenceID;	// 32
-}  ATTRIBUTE_PACKED;
+// struct annotation_st {
+// 	ShortLength position;	// 32
+// 	union positionPtr start;	// 32
+// 	union positionPtr finish;	// 32
+// 	ShortLength length;	// 32
+// 	IDnum sequenceID;	// 32
+// }  ATTRIBUTE_PACKED;
 
 struct roadmap_st {
 	ShortLength annotationCount;

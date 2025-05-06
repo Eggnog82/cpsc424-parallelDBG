@@ -32,6 +32,19 @@ struct roadMapArray_st {
 	IDnum referenceCount;
 };
 
+union positionPtr {
+	ShortLength coord;
+	IDnum nodeID;
+}  ATTRIBUTE_PACKED;
+
+struct annotation_st {
+	ShortLength position;	// 32
+	union positionPtr start;	// 32
+	union positionPtr finish;	// 32
+	ShortLength length;	// 32
+	IDnum sequenceID;	// 32
+}  ATTRIBUTE_PACKED;
+
 ////////////////////////////////////////////////////////////////////
 //      Annotation stuff
 ////////////////////////////////////////////////////////////////////

@@ -996,11 +996,72 @@ PreGraph *emptyPreGraph_pg(IDnum sequenceCount, IDnum referenceCount, int wordLe
 }
 
 static Descriptor *newDescriptor_pg(Coordinate length, SequencesReader *seqReadInfo,
-				    Kmer * initialKmer, int wordLength)
+	Kmer * initialKmer, int wordLength)
 {
 	char letter;
 	Nucleotide nucleotide;
 	Coordinate totalLength = length + wordLength - 1;
+	size_t arrayLength = totalLength / 4;
+	Descriptor *res;
+	Coordinate index;
+	Kmer kmerCopy;
+
+	if (totalLength % 4 > 0)
+	arrayLength++;
+
+	res = callocOrExit(arrayLength, Descriptor);
+
+	copyKmers(&kmerCopy, initialKmer);
+	for (index = wordLength - 2; index >= 0; index--)
+	writeNucleotideInDescriptor_pg(popNucleotide(&kmerCopy), res,
+			index);
+
+	for (index = wordLength - 1; index < totalLength; index++) {
+	if (seqReadInfo->m_bIsBinary) {
+	letter = **seqReadInfo->m_ppCurrString;
+	*seqReadInfo->m_ppCurrString += 1;   // increment the pointer
+	} else {
+	letter = getc(seqReadInfo->m_pFile);
+	while (!isalpha(letter))
+	letter = getc(seqReadInfo->m_pFile);
+	}
+	//velvetLog("%c", letter);
+	switch (letter) {
+	case 'N':
+	case 'A':
+	nucleotide = ADENINE;
+	break;
+	case 'C':
+	nucleotide = CYTOSINE;
+	break;
+	case 'G':
+	nucleotide = GUANINE;
+	break;
+	case 'T':
+	nucleotide = THYMINE;
+	break;
+	default:
+	fflush(stdout);
+	abort();
+	}
+
+	writeNucleotideInDescriptor_pg(nucleotide, res, index);
+	pushNucleotide(initialKmer, nucleotide);
+	}
+
+	//velvetLog(" ");
+
+	return res;
+}
+
+
+static Descriptor *newDescriptor_pgOMP(Coordinate length, SequencesReader *seqReadInfo,
+				    Kmer * initialKmer, int wordLength, char* sequenceStr, Coordinate readIndex, IDnum sequenceIndex)
+{
+	char letter;
+	Nucleotide nucleotide;
+	Coordinate totalLength = length + wordLength - 1;
+	// velvetLog("Sequence %d: In newDescriptor_pg(), totalLength = %d, length = %d, wordLength = %d\n", sequenceIndex, totalLength, length, wordLength);
 	size_t arrayLength = totalLength / 4;
 	Descriptor *res;
 	Coordinate index;
@@ -1017,15 +1078,16 @@ static Descriptor *newDescriptor_pg(Coordinate length, SequencesReader *seqReadI
 					       index);
 
 	for (index = wordLength - 1; index < totalLength; index++) {
-		if (seqReadInfo->m_bIsBinary) {
-			letter = **seqReadInfo->m_ppCurrString;
-			*seqReadInfo->m_ppCurrString += 1;   // increment the pointer
-		} else {
-			letter = getc(seqReadInfo->m_pFile);
-			while (!isalpha(letter))
-				letter = getc(seqReadInfo->m_pFile);
-		}
+		// if (seqReadInfo->m_bIsBinary) {
+		// 	letter = **seqReadInfo->m_ppCurrString;
+		// 	*seqReadInfo->m_ppCurrString += 1;   // increment the pointer
+		// } else {
+		// 	letter = getc(seqReadInfo->m_pFile);
+		// 	while (!isalpha(letter))
+		// 		letter = getc(seqReadInfo->m_pFile);
+		// }
 		//velvetLog("%c", letter);
+		letter = sequenceStr[readIndex];
 		switch (letter) {
 		case 'N':
 		case 'A':
@@ -1047,6 +1109,8 @@ static Descriptor *newDescriptor_pg(Coordinate length, SequencesReader *seqReadI
 
 		writeNucleotideInDescriptor_pg(nucleotide, res, index);
 		pushNucleotide(initialKmer, nucleotide);
+
+		readIndex++;
 	}
 
 	//velvetLog(" ");
@@ -1114,9 +1178,10 @@ PreMarker * addPreMarker_pg(PreGraph * preGraph, IDnum nodeID, IDnum seqID, Coor
 
 	return preMarker;
 }
+
 void addPreNodeToPreGraph_pg(PreGraph * preGraph, Coordinate start,
-			     Coordinate finish, SequencesReader *seqReadInfo,
-			     Kmer * initialKmer, IDnum ID)
+	Coordinate finish, SequencesReader *seqReadInfo,
+	Kmer * initialKmer, IDnum ID)
 {
 	PreNode *newnd = &(preGraph->preNodes[ID]);
 
@@ -1126,8 +1191,24 @@ void addPreNodeToPreGraph_pg(PreGraph * preGraph, Coordinate start,
 	newnd->length = finish - start;
 
 	newnd->descriptor =
-	    newDescriptor_pg(newnd->length, seqReadInfo, initialKmer,
-			     preGraph->wordLength);
+	newDescriptor_pg(newnd->length, seqReadInfo, initialKmer,
+		preGraph->wordLength);
+}
+
+void addPreNodeToPreGraph_pgOMP(PreGraph * preGraph, Coordinate start,
+			     Coordinate finish, SequencesReader *seqReadInfo,
+			     Kmer * initialKmer, IDnum ID, char *sequenceStr, Coordinate readIndex, IDnum sequenceIndex)
+{
+	PreNode *newnd = &(preGraph->preNodes[ID]);
+
+	newnd->preArcLeft = NULL_IDX;
+	newnd->preArcRight = NULL_IDX;
+
+	newnd->length = finish - start;
+
+	newnd->descriptor =
+	    newDescriptor_pgOMP(newnd->length, seqReadInfo, initialKmer,
+			     preGraph->wordLength, sequenceStr, readIndex, sequenceIndex);
 }
 
 static void exportPreNode_pg(FILE * outfile, PreNode * preNode, IDnum ID,

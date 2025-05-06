@@ -87,8 +87,11 @@ boolean isLoop_pg(PreArcI preArc);
 PreGraph *emptyPreGraph_pg(IDnum sequenceCount, IDnum referenceCount, int wordLength, boolean double_strand);
 void allocatePreNodeSpace_pg(PreGraph * preGraph, IDnum preNodeCount);
 void addPreNodeToPreGraph_pg(PreGraph * preGraph, Coordinate start,
+    Coordinate stop, SequencesReader *seqReadInfo,
+    Kmer * initialKmer, IDnum ID);
+void addPreNodeToPreGraph_pgOMP(PreGraph * preGraph, Coordinate start,
 			     Coordinate stop, SequencesReader *seqReadInfo,
-			     Kmer * initialKmer, IDnum ID);
+			     Kmer * initialKmer, IDnum ID, char *sequenceStr, Coordinate readIndex, IDnum sequenceIndex);
 
 // Deallocation
 void destroyPreGraph_pg(PreGraph * preGraph);
